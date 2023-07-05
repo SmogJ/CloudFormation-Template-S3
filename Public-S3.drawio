@@ -1,0 +1,27 @@
+<mxfile host="app.diagrams.net" modified="2023-07-05T21:41:58.283Z" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36 Edg/114.0.1823.67" etag="HKk6Hp1_8va4_O4pvJ1E" version="21.5.1" type="device">
+  <diagram name="Page-1" id="15Qsg4WnYpBqHGABahrq">
+    <mxGraphModel dx="866" dy="508" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1100" pageHeight="850" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="NWuoL5AxD9Q3kNbQcrdh-5" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="1" source="NWuoL5AxD9Q3kNbQcrdh-2">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="510" y="170" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="NWuoL5AxD9Q3kNbQcrdh-2" value="Postman sends request" style="sketch=0;outlineConnect=0;fontColor=#ffffff;fillColor=#1ba1e2;strokeColor=#006EAF;dashed=0;verticalLabelPosition=bottom;verticalAlign=top;align=center;html=1;fontSize=12;fontStyle=0;aspect=fixed;pointerEvents=1;shape=mxgraph.aws4.client;" vertex="1" parent="1">
+          <mxGeometry x="340" y="132" width="78" height="76" as="geometry" />
+        </mxCell>
+        <mxCell id="NWuoL5AxD9Q3kNbQcrdh-4" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="1" source="NWuoL5AxD9Q3kNbQcrdh-3" target="NWuoL5AxD9Q3kNbQcrdh-2">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="NWuoL5AxD9Q3kNbQcrdh-3" value="python script to simulate request for Postman" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="120" y="140" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="NWuoL5AxD9Q3kNbQcrdh-6" value="S3" style="outlineConnect=0;dashed=0;verticalLabelPosition=bottom;verticalAlign=top;align=center;html=1;shape=mxgraph.aws3.s3;fillColor=#E05243;gradientColor=none;" vertex="1" parent="1">
+          <mxGeometry x="510" y="124" width="76.5" height="93" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
