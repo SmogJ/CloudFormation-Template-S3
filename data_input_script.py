@@ -6,7 +6,7 @@ from dotenv import load_dotenv
 load_dotenv()  # take environment variables from .env.
 
 def send_user_data_to_s3(user_data, s3_bucket_url):
-    ApiKey= os.getenv("POSTMAN_API_KEY.env")
+    ApiKey= os.getenv("POSTMAN_API_KEY")
 
     if api_key is None:
         print('Postman API key not found. Make sure you have set the environment variable.')
@@ -44,6 +44,11 @@ for col in sheet.iter_cols(values_only=True):
 workbook.close()
 
 # Enter S3 bucket URL/filename
-s3_bucket_url = 's3://user-data-container/mock-file-3.txt'  
+s3url= os.getenv("S3_URL")
+
+if s3url is None:
+    print('Postman API key not found. Make sure you have set the environment variable.')
+
+s3_bucket_url = s3url
 
 send_user_data_to_s3(user_data, s3_bucket_url)
