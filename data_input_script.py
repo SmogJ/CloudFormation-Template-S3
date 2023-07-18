@@ -20,13 +20,15 @@ sheet = workbook['MOCK_DATA']
 
 # Data
 user_data={}
-count=0
 
-# iterate through the columns of the sheet
-for col in sheet.iter_cols(values_only=True):
-    # user_data[col[0]]=[value for value in col[1:]]
-    count+=1
-    user_data[col[0]]= col[count]
+count= range(100)
+
+for n in count:
+    if n > 1:
+        # iterate through the columns of the sheet
+        for col in sheet.iter_cols(values_only=True):
+            user_data[col[0]]=col[n] 
+    
     
 
 # Close the workbook
