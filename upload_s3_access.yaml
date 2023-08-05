@@ -8,11 +8,21 @@ Description: Template Provision S3 Bucket with internet access
 
 Parameters:
   DataStoreParameter:
+    Description: User data object in s3 bucket
     Type: String
 
   DataPolicyParameter:
+    Description: bucket policy 
     Type: String
 
+  DataTable:
+    Description: transcational data for each user
+    Type: String
+  
+  DataFunc:
+    Description: lambda function to get individual user data from file in bucket
+    Type: String
+  
 # Rules:
 #   set of rules
 
@@ -29,8 +39,9 @@ Parameters:
 Resources:
   user-data-store:
     Type: AWS::S3::Bucket
-    Properties: 
-      BucketName: !Ref user-data-store
+    Properties:
+      InstanceType: !Ref DataStoreParameter
+      BucketName: user-data-store
       CorsConfiguration: 
         CorsRule:
             AllowedHeaders: 
@@ -59,7 +70,8 @@ Resources:
   Policy-data-store:
     Type: AWS::S3::BucketPolicy
     Properties: 
-      Bucket: !Ref user-data-store
+      InstanceType: !Ref DataPolicyParameter
+      Bucket: user-data-store
       PolicyDocument:
         Version: "2012-10-17"
         Statement:
@@ -77,33 +89,15 @@ Resources:
     Type: AWS::DynamoDB::Table
     Properties: 
       AttributeDefinitions: 
-        - AttributeDefinition
-      BillingMode: String
-      ContributorInsightsSpecification: 
-        ContributorInsightsSpecification
-      DeletionProtectionEnabled: Boolean
-      GlobalSecondaryIndexes: 
-        - GlobalSecondaryIndex
-      ImportSourceSpecification: 
-        ImportSourceSpecification
+        -     AttributeName: id
+              AttributeType: N
       KeySchema: 
-        - KeySchema
-      KinesisStreamSpecification: 
-        KinesisStreamSpecification
-      LocalSecondaryIndexes: 
-        - LocalSecondaryIndex
-      PointInTimeRecoverySpecification: 
-        PointInTimeRecoverySpecification
-      ProvisionedThroughput: 
-        ProvisionedThroughput
-      SSESpecification: 
-        SSESpecification
-      StreamSpecification: 
-        StreamSpecification
-      TableClass: String
-      TableName: String
+        -   AttributeName: id
+            KeyType: Hash
+      TableName: user-store
       Tags: 
-        - Tag
+        - Key: Name
+          Value: dynamodb-user-store
       TimeToLiveSpecification: 
         TimeToLiveSpecification
 
@@ -118,49 +112,39 @@ Resources:
         import json
         import boto3
 
-        # initiating resources
+        # s3= boto3.resource('s3')
         s3_client= boto3.client('s3')
 
         dynamodb = boto3.resource('dynamodb')
-        table = dynamodb.Table('user-info')
+        table = dynamodb.Table('user-store')
+
+        # bucket= s3.Bucket('user-data-container')
 
         def lambda_handler(event, context):
             bucket_name = event['Records'][0]["s3"]["bucket"]["name"]
             s3_file_name = event['Records'][0]["s3"]["object"]["key"]
-            response = s3_client.get_object(Bucket='user-data-container', Key='mock-file-3.txt')
+            response = s3_client.get_object(Bucket='user-data-store', Key='mock-file-3.txt')
             
             # decode the data and split the data in the json to a newline
-            user = response['Body'].read().decode('utf-8')
-            user= user.split('\n')
+            # user = response['Body'].read().decode('utf-8')
+            user= json.loads(response['Body'].read())
+
+
+            # Raise Exception when inputing data
+            try:
+                response= table.put_item(Item=user)
+                print('Data inserted successfully into DynamoDB:', response)
+            except Exception as e:
+                print('Failed to insert data into DynamoDB:', e)
             
-            for data in user:
-                # info.append(data.split(','))
-                data= data.split(',')
-                try:
-                    table.put_item(
-                        item={
-                            "id": int(data[0]),
-                            "firstname": str(data[1]),
-                            "lastname": str(data[2]),
-                            "email":data[3],
-                            "gender":str(data[4]),
-                            "ip_address":data[5],
-                            "picture":data[6],
-                            "country":data[7],
-                            "state": data[8],
-                            "address":str(data[9]),
-                        }
-                            )
-                except Exception as err:
-                    print (">>>>>>>>"+str(err))
             
             return{
                 'statusCode': 200,
-                'body': json.dumps('Items added successfully!')
-                }
+                'body': json.dumps('Items added successfully!'),
+              }
       Description: test function to move specific data to DyanmoDB
-      FunctionName: !Ref data-trans-func
-      Handler: data_trans_func.lambda_handler
+      FunctionName: dynamo-func
+      Handler: dynamo-func.lambda_handler
       PackageType: zip
       Role: cil-academy-lambda-role
       Runtime: Python 3.10
