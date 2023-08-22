@@ -1,26 +1,23 @@
----
-
 AWSTemplateFormatVersion: "2010-09-09"
-Description: Template Provision S3 Bucket with internet access
+Description: Template for creating an S3 Bucket with internet access
 
 # Metadata:
 #   template metadata
 
 Parameters:
   DataStoreParameter:
+    Default: UserDataStore
     Description: User data object in s3 bucket
     Type: String
 
   DataPolicyParameter:
+    Default: DataStorePolicy
     Description: bucket policy 
     Type: String
 
-  DataTable:
-    Description: transcational data for each user
-    Type: String
-  
-  DataFunc:
-    Description: lambda function to get individual user data from file in bucket
+  VersioningEnabled:
+    Default: 'true'
+    Description: Enable versioning for the S3 bucket
     Type: String
   
 # Rules:
@@ -37,29 +34,28 @@ Parameters:
 
 
 Resources:
-  user-data-store:
+  UserDataStore:
     Type: AWS::S3::Bucket
     Properties:
-      InstanceType: !Ref DataStoreParameter
-      BucketName: user-data-store
-      CorsConfiguration: 
-        CorsRule:
-            AllowedHeaders: 
+      BucketName: all-users-info
+      CorsConfiguration:
+        CorsRules: 
+          - AllowedHeaders: 
               - "*"
             AllowedMethods: 
-              - Put
-              - Post
-              - Get
-              - Delete
+              - PUT
+              - GET
+              - DELETE
+              - POST
             AllowedOrigins: 
               - "*"
             ExposedHeaders: 
               - Date
       PublicAccessBlockConfiguration: 
-          BlockPublicAcls: False
-          BlockPublicPolicy: False
-          IgnorePublicAcls: False
-          RestrictPublicBuckets: False
+        BlockPublicAcls: False
+        BlockPublicPolicy: False
+        IgnorePublicAcls: False
+        RestrictPublicBuckets: False
       Tags: 
         - Key: "S3"
           Value: "UserData"
@@ -67,98 +63,36 @@ Resources:
         Status: Enabled
   
 
-  Policy-data-store:
+  DataStorePolicy:
     Type: AWS::S3::BucketPolicy
     Properties: 
-      InstanceType: !Ref DataPolicyParameter
-      Bucket: user-data-store
+      Bucket: !Ref UserDataStore
       PolicyDocument:
         Version: "2012-10-17"
         Statement:
           - Effect: Allow
+            Principal: "*"
             Action:
               - s3:PutObject
               - s3:DeleteObject
               - s3:GetObject
-            Resource: '*'
-        Resources:
-          arn:aws:s3:::user-data-store/*
-
-
-  user-data:
-    Type: AWS::DynamoDB::Table
-    Properties: 
-      AttributeDefinitions: 
-        -     AttributeName: id
-              AttributeType: N
-      KeySchema: 
-        -   AttributeName: id
-            KeyType: Hash
-      TableName: user-store
-      Tags: 
-        - Key: Name
-          Value: dynamodb-user-store
-      TimeToLiveSpecification: 
-        TimeToLiveSpecification
-
-
-  data-trans-func:
-    Type: AWS::Lambda::Function
-    Properties: 
-      Architectures: 
-        -  x86_64
-      Code: 
-        ZipFile | 
-        import json
-        import boto3
-
-        # s3= boto3.resource('s3')
-        s3_client= boto3.client('s3')
-
-        dynamodb = boto3.resource('dynamodb')
-        table = dynamodb.Table('user-store')
-
-        # bucket= s3.Bucket('user-data-container')
-
-        def lambda_handler(event, context):
-            bucket_name = event['Records'][0]["s3"]["bucket"]["name"]
-            s3_file_name = event['Records'][0]["s3"]["object"]["key"]
-            response = s3_client.get_object(Bucket='user-data-store', Key='mock-file-3.txt')
+            Resource: !Join 
+              - ''
+              - - 'arn:aws:s3:::'
+                - !Ref UserDataStore
+                - /*
             
-            # decode the data and split the data in the json to a newline
-            # user = response['Body'].read().decode('utf-8')
-            user= json.loads(response['Body'].read())
-
-
-            # Raise Exception when inputing data
-            try:
-                response= table.put_item(Item=user)
-                print('Data inserted successfully into DynamoDB:', response)
-            except Exception as e:
-                print('Failed to insert data into DynamoDB:', e)
-            
-            
-            return{
-                'statusCode': 200,
-                'body': json.dumps('Items added successfully!'),
-              }
-      Description: test function to move specific data to DyanmoDB
-      FunctionName: dynamo-func
-      Handler: dynamo-func.lambda_handler
-      PackageType: zip
-      Role: cil-academy-lambda-role
-      Runtime: Python 3.10
 
 
 Outputs:
   DataStoreOutput:
     Description: Output for data store s3 bucket with internet access
-    Value: !Ref DataStoreParameter
+    Value: !Ref UserDataStore
     Export:
-      Name: !Ref user-data-store
+      Name: S3DataBucket
 
   DataPolicyOutput:
     Description: Data Policy 
-    Value: !Ref DataPolicyParameter
+    Value: !Ref DataStorePolicy
     Export:
-      Name: !Ref Policy-data-store
+      Name: DataBucketPolicy

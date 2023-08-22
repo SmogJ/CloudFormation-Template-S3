@@ -3,6 +3,7 @@ import openpyxl
 import os
 
 from dotenv import load_dotenv
+
 load_dotenv()  # take environment variables from .env
 
 # S3 url imported from env
