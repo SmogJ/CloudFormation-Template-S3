@@ -1,4 +1,4 @@
-# Simpe AWS Architecture to Upload data to S3
+# Simple AWS Architecture to Upload data to S3
 
 This is my first cloud project using Amazon Web Service AWS. The project is a simple cloudformation template that provisions an S3 with public access.
 
